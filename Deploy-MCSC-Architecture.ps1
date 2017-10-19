@@ -40,8 +40,6 @@ $FunctionName = $FunctionName.ToLower()
 $WebAppAuthName = Read-Host -Prompt 'Input the Unique Web App Auth site Name'
 $WebAppAuthName = $WebAppAuthName.ToLower()
 
-WebAppPortal
-
 # Web App Portal Site Name
 $WebAppPortalName = Read-Host -Prompt 'Input the Unique Web App Portal site Name'
 $WebAppPortalName = $WebAppPortalName.ToLower()
