@@ -46,11 +46,11 @@
 		}
 	},
 	"variables": {
-		"storageAccountName": "[concat('func', uniqueString(resourceGroup().id), 'storage')]",
+		"storageAccountName": "[concat(parameters('functionAppsName'), '_storage')]",
 		"sbVersion": "2015-08-01",
 		"defaultSASKeyName": "RootManageSharedAccessKey",
 		"SBauthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusNamespaceName'), variables('defaultSASKeyName'))]",
-		"appInsightsName": "[concat(parameters('sites_MCSC_Portal_name'), '_insights')]"
+		"appInsightsName": "[concat(parameters('functionAppsName'), '_insights')]"
 	},
 	"resources": [
 		{
