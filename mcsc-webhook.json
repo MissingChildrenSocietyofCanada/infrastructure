@@ -46,7 +46,7 @@
 		}
 	},
 	"variables": {
-		"storageAccountName": "[concat(parameters('functionAppsName'), '_storage')]",
+		"storageAccountName": "[concat('hook', uniqueString(resourceGroup().id), 'storage')]",
 		"sbVersion": "2015-08-01",
 		"defaultSASKeyName": "RootManageSharedAccessKey",
 		"SBauthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusNamespaceName'), variables('defaultSASKeyName'))]",

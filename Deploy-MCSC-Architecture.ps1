@@ -407,7 +407,7 @@ $Results = New-AzureRmResourceGroupDeployment -Name $DeploymentName -ResourceGro
         augment_topic_name="toAugment"; `
     } -Force
 
-Write-Output $Results.DeploymentName + ' completed with provisioning state : ' + $Results.ProvisioningState 
+Write-Output "$($Results.DeploymentName) completed with provisioning state : $($Results.ProvisioningState)"
 Write-Output  '*****************************************************'
 
 #endregion
@@ -427,7 +427,7 @@ $Results = New-AzureRmResourceGroupDeployment -Name $DeploymentName -ResourceGro
         twitterHashtag=$TwitterHashtagTrigger.ToString(); `
     } -Force
 
-Write-Output $Results.DeploymentName + ' completed with provisioning state : ' + $Results.ProvisioningState 
+Write-Output "$($Results.DeploymentName) completed with provisioning state : $($Results.ProvisioningState)"
 Write-Output  '*****************************************************'
 
 #endregion
@@ -453,7 +453,7 @@ $Results = New-AzureRmResourceGroupDeployment -Name $DeploymentName -ResourceGro
         branch=$GitHubBranch.ToString(); `
     } -Force
 
-Write-Output $Results.DeploymentName + ' completed with provisioning state : ' + $Results.ProvisioningState 
+Write-Output "$($Results.DeploymentName) completed with provisioning state : $($Results.ProvisioningState)" 
 Write-Output  '*****************************************************'
 
 #endregion
@@ -474,7 +474,7 @@ $Results = New-AzureRmResourceGroupDeployment -Name $DeploymentName -ResourceGro
         branch=$GitHubBranch.ToString(); `
     } -Force
 
-Write-Output $Results.DeploymentName + ' completed with provisioning state : ' + $Results.ProvisioningState 
+Write-Output "$($Results.DeploymentName) completed with provisioning state : $($Results.ProvisioningState)"
 Write-Output  '*****************************************************'
 
 #endregion
@@ -504,7 +504,7 @@ else {
         branch=$GitHubBranch.ToString(); `
     } -Force
 }
-Write-Output $Results.DeploymentName + ' completed with provisioning state : ' + $Results.ProvisioningState 
+Write-Output "$($Results.DeploymentName) completed with provisioning state : $($Results.ProvisioningState)"
 Write-Output  '*****************************************************'
 
 #endregion
@@ -522,7 +522,7 @@ $Results = New-AzureRmResourceGroupDeployment -Name $DeploymentName -ResourceGro
         branch=$GitHubBranch.ToString(); `
     } -Force
 
-Write-Output $Results.DeploymentName + ' completed with provisioning state : ' + $Results.ProvisioningState 
+Write-Output "$($Results.DeploymentName) completed with provisioning state : $($Results.ProvisioningState)"
 Write-Output  '*****************************************************'
 
 #endregion
