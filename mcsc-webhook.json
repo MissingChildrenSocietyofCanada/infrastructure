@@ -38,7 +38,7 @@
 		},
 		"repoURL": {
 			"type": "string",
-			"defaultValue": "https://github.com/Missing-Children-Society-Canada/webhooks"
+			"defaultValue": "https://github.com/MissingChildrenSocietyofCanada/webhooks"
 		},
 		"branch": {
 			"type": "string",
@@ -49,90 +49,109 @@
 		"storageAccountName": "[concat('func', uniqueString(resourceGroup().id), 'storage')]",
 		"sbVersion": "2015-08-01",
 		"defaultSASKeyName": "RootManageSharedAccessKey",
-		"SBauthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusNamespaceName'), variables('defaultSASKeyName'))]"
+		"SBauthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusNamespaceName'), variables('defaultSASKeyName'))]",
+		"appInsightsName": "[concat(parameters('sites_MCSC_Portal_name'), '_insights')]"
 	},
-	"resources": [{
-		"type": "Microsoft.Storage/storageAccounts",
-		"name": "[variables('storageAccountName')]",
-		"apiVersion": "2015-06-15",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"accountType": "[parameters('storageAccountType')]"
-		}
-	}, 
-	{
-		"apiVersion": "2016-03-01",
-		"type": "Microsoft.Web/sites",
-		"name": "[parameters('functionAppsName')]",
-		"location": "[resourceGroup().location]",
-		"kind": "functionapp",
-		"properties": {
-			"name": "[parameters('functionAppsName')]",
-			"clientAffinityEnabled": false,
-			"siteConfig": {
-				"cors": {
-					"allowedOrigins": [
-						"*"
-					]
-				},
-				"appSettings": [
-				{
-					"name": "FUNCTIONS_EXTENSION_VERSION",
-					"value": "~1"
-				}, 
-				{
-					"name": "AzureWebJobsStorage",
-					"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
-				}, 
-				{
-					"name": "AzureWebJobsDashboard",
-					"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
-				}, 
-				{
-					"name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-					"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
-				}, 
-				{
-					"name": "WEBSITE_CONTENTSHARE",
-					"value": "[toLower(parameters('functionAppsName'))]"
-				}, 
-				{
-					"name": "WEBSITE_NODE_DEFAULT_VERSION",
-					"value": "6.5.0"
-				}, 
-				{
-					"name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-					"value": ""
-				}, 
-				{
-					"name": "AzureWebJobsServiceBus",
-					"value": "[listkeys(variables('SBauthRuleResourceId'), variables('sbVersion')).primaryConnectionString]"
-				}, 
-				{
-					"name": "FB_VERIFY_TOKEN",
-					"value": "[parameters('facebookToken')]"
-				}, 
-				{
-					"name": "IG_VERIFY_TOKEN",
-					"value": "[parameters('instagramToken')]"
-				}]
-			}
-		},
-		"dependsOn": [
-			"[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
-		],
-		"resources": [{
-			"apiVersion": "2015-08-01",
-			"name": "web",
-			"type": "sourcecontrols",
-			"dependsOn": [
-				"[resourceId('Microsoft.Web/Sites', parameters('functionAppsName'))]"
-			],
+	"resources": [
+		{
+			"type": "Microsoft.Storage/storageAccounts",
+			"name": "[variables('storageAccountName')]",
+			"apiVersion": "2015-06-15",
+			"location": "[resourceGroup().location]",
 			"properties": {
-				"RepoUrl": "[parameters('repoURL')]",
-				"branch": "[parameters('branch')]",
-				"IsManualIntegration": true
+				"accountType": "[parameters('storageAccountType')]"
 			}
-		}]
-	}]
+		}, 
+		{
+			"type": "microsoft.insights/components",
+			"kind": "web",
+			"name": "[variables('appInsightsName')]",
+			"apiVersion": "2014-04-01",
+			"location": "eastus",
+			"tags": {
+				"applicationType": "web",
+				"[concat('hidden-link:/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Web/sites/',parameters('functionAppsName'))]": "Resource"
+			},
+			"scale": null,
+			"properties": {
+				"ApplicationId": "[variables('appInsightsName')]"
+			},
+			"dependsOn": []
+		},
+		{
+			"apiVersion": "2016-08-01",
+			"type": "Microsoft.Web/sites",
+			"name": "[parameters('functionAppsName')]",
+			"location": "[resourceGroup().location]",
+			"kind": "functionapp",
+			"properties": {
+				"name": "[parameters('functionAppsName')]",
+				"clientAffinityEnabled": false,
+				"siteConfig": {
+					"cors": {
+						"allowedOrigins": [
+							"*"
+						]
+					},
+					"appSettings": [
+					{
+						"name": "FUNCTIONS_EXTENSION_VERSION",
+						"value": "~1"
+					}, 
+					{
+						"name": "AzureWebJobsStorage",
+						"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+					}, 
+					{
+						"name": "AzureWebJobsDashboard",
+						"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+					}, 
+					{
+						"name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+						"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+					}, 
+					{
+						"name": "WEBSITE_CONTENTSHARE",
+						"value": "[toLower(parameters('functionAppsName'))]"
+					}, 
+					{
+						"Name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+						"Value": "[reference(resourceId('microsoft.insights/components', variables('appInsightsName')), '2014-04-01').InstrumentationKey]"
+					},
+					{
+						"name": "AzureWebJobsServiceBus",
+						"value": "[listkeys(variables('SBauthRuleResourceId'), variables('sbVersion')).primaryConnectionString]"
+					}, 
+					{
+						"name": "FB_VERIFY_TOKEN",
+						"value": "[parameters('facebookToken')]"
+					}, 
+					{
+						"name": "IG_VERIFY_TOKEN",
+						"value": "[parameters('instagramToken')]"
+					}]
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+				"[resourceId('microsoft.insights/components', variables('appInsightsName'))]"
+			],
+			"resources": [
+				{
+					"apiVersion": "2016-08-01",
+					"name": "web",
+					"type": "sourcecontrols",
+					"dependsOn": [
+					"[resourceId('Microsoft.Web/sites/', parameters('functionAppsName'))]"
+					],
+					"properties": {
+					"name": "GitHub",
+					"repoUrl": "[parameters('repoURL')]",
+					"branch": "[parameters('branch')]",
+					"IsManualIntegration": true
+					}
+				}
+			]
+		}
+	]
 }

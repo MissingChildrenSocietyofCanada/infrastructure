@@ -3,12 +3,12 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "sites_MCSC_Authorization_name": {
-            "defaultValue": "",
+            "defaultValue": "mcsc-hfm-web-auth",
             "type": "string"
         },
         "cosmosDBAccountName": {
             "type": "string",
-            "defaultValue": "missingchildrendata2",
+            "defaultValue": "mcsc-hfm-db",
             "metadata": {
                 "description": "mcsc-supporting-api"
             }
@@ -18,14 +18,6 @@
             "type": "string"
         },
         "TWITTER_CONSUMER_SECRET": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "ROOT": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "APP_INSIGHTS_KEY": {
             "defaultValue": "",
             "type": "string"
         },
@@ -49,28 +41,42 @@
             "defaultValue": "",
             "type": "string"
         },
-        "PORTAL_APP_INSIGHTS_KEY": {
-            "defaultValue": "",
-            "type": "string"
-        },
         "WEBSITE_NODE_DEFAULT_VERSION": {
-            "defaultValue": "",
+            "defaultValue": "4.4.7",
             "type": "string"
         },
         "repoURL": {
             "type": "string",
-            "defaultValue": "https://github.com/Missing-Children-Society-Canada/authorization"
+            "defaultValue": "https://github.com/MissingChildrenSocietyofCanada/authorization"
         },
         "branch": {
             "type": "string",
             "defaultValue": "master"
         }
     },
-    "variables": {},
+    "variables": {
+        "appInsightsName": "[concat(parameters('sites_MCSC_Authorization_name'), '_insights')]"
+    },
     "resources": [
+		{
+            "type": "microsoft.insights/components",
+            "kind": "web",
+            "name": "[variables('appInsightsName')]",
+            "apiVersion": "2014-04-01",
+            "location": "eastus",
+            "tags": {
+                "applicationType": "web",
+                "[concat('hidden-link:/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Web/sites/',parameters('sites_MCSC_Authorization_name'))]": "Resource"
+            },
+            "scale": null,
+            "properties": {
+                "ApplicationId": "[variables('appInsightsName')]"
+            },
+            "dependsOn": []
+        },
         {
-            "type": "Microsoft.Web/Sites",
-            "apiVersion": "2015-08-01",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2016-08-01",
             "name": "[parameters('sites_MCSC_Authorization_name')]",
             "location": "[resourceGroup().location]",
             "properties": {
@@ -79,7 +85,7 @@
                     "phpVersion": "off",
                     "appSettings": [
                         {
-                            "Name": "DOC_DB",
+                            "Name": "MONGO_DB",
                             "Value": "[concat('https://', parameters('cosmosDBAccountName'), '.documents.azure.com:443')]"
                         },
                         {
@@ -96,11 +102,11 @@
                         },
                         {
                             "Name": "ROOT",
-                            "Value": "[parameters('ROOT')]"
+                            "Value": "[concat('https://', parameters('sites_MCSC_Authorization_name'), '.azurewebsites.net')]"
                         },
                         {
-                            "Name": "APP_INSIGHTS_KEY",
-                            "Value": "[parameters('APP_INSIGHTS_KEY')]"
+                            "Name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "Value": "[reference(resourceId('microsoft.insights/components', variables('appInsightsName')), '2014-04-01').InstrumentationKey]"
                         },
                         {
                             "Name": "WEBSITE_NODE_DEFAULT_VERSION",
@@ -125,17 +131,29 @@
                         {
                             "Name": "INSTAGRAM_CONSUMER_SECRET",
                             "Value": "[parameters('INSTAGRAM_CONSUMER_SECRET')]"
-                        },
-                        {
-                            "Name": "PORTAL_APP_INSIGHTS_KEY",
-                            "Value": "[parameters('PORTAL_APP_INSIGHTS_KEY')]"
                         }
-                    ],
-                    "RepoUrl": "[parameters('repoURL')]",
-                    "branch": "[parameters('branch')]",
-                    "IsManualIntegration": true
+                    ]
                 }
-            }
-        }
+            },
+			"dependsOn": [
+                "[resourceId('microsoft.insights/components', variables('appInsightsName'))]"
+            ],
+            "resources": [
+               {
+                    "apiVersion": "2016-08-01",
+                    "name": "web",
+                    "type": "sourcecontrols",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.Web/sites/', parameters('sites_MCSC_Authorization_name'))]"
+                    ],
+                    "properties": {
+                      "name": "GitHub",
+                      "repoUrl": "[parameters('repoURL')]",
+                      "branch": "[parameters('branch')]",
+                      "IsManualIntegration": true
+                    }
+               }
+            ]
+        }		
     ]
 }

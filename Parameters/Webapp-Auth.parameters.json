@@ -3,18 +3,15 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "sites_MCSC_Authorization_name": {
-            "value": "mcsc-authorization-pr"
+            "value": "testhfmauthapp2"
+        },
+        "cosmosDBAccountName": {
+            "value": "testhfmdb"
         },
         "TWITTER_CONSUMER_KEY": {
             "value": ""
         },
         "TWITTER_CONSUMER_SECRET": {
-            "value": ""
-        },
-        "ROOT": {
-            "value": ""
-        },
-        "APP_INSIGHTS_KEY": {
             "value": ""
         },
         "IG_VERIFY_TOKEN": {
@@ -32,14 +29,11 @@
         "INSTAGRAM_CONSUMER_SECRET": {
             "value": ""
         },
-        "PORTAL_APP_INSIGHTS_KEY": {
-            "value": ""
-        },
         "WEBSITE_NODE_DEFAULT_VERSION": {
-            "value": ""
+            "value": "4.4.7"
         },
         "repoURL": {
-            "value": "https://github.com/Missing-Children-Society-Canada/authorization"
+            "value": "https://github.com/MissingChildrenSocietyofCanada/authorization"
         },
         "branch": {
             "value": "master"

@@ -2,47 +2,87 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "sites_MCSC_Authorization_name": {
-            "defaultValue": "mcsc-portal",
+        "sites_MCSC_Portal_name": {
+            "defaultValue": "mcsc-hfm-portal",
             "type": "string"
         },
-        "APP_INSIGHTS_KEY": {
+        "WEBSITE_NODE_DEFAULT_VERSION": {
+            "defaultValue": "4.4.7",
             "type": "string"
         },
         "repoURL": {
             "type": "string",
-            "defaultValue": "https://github.com/Missing-Children-Society-Canada/portal"
+            "defaultValue": "https://github.com/MissingChildrenSocietyofCanada/portal-node"
         },
         "branch": {
             "type": "string",
             "defaultValue": "master"
         }
     },
+    "variables": {
+        "appInsightsName": "[concat(parameters('sites_MCSC_Portal_name'), '_insights')]"
+    },
     "resources": [
+		{
+            "type": "microsoft.insights/components",
+            "kind": "web",
+            "name": "[variables('appInsightsName')]",
+            "apiVersion": "2014-04-01",
+            "location": "eastus",
+            "tags": {
+                "applicationType": "web",
+                "[concat('hidden-link:/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Web/sites/',parameters('sites_MCSC_Portal_name'))]": "Resource"
+            },
+            "scale": null,
+            "properties": {
+                "ApplicationId": "[variables('appInsightsName')]"
+            },
+            "dependsOn": []
+        },
         {
-            "type": "Microsoft.Web/Sites",
-            "apiVersion": "2015-08-01",
-            "name": "[parameters('sites_MCSC_Authorization_name')]",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2016-08-01",
+            "name": "[parameters('sites_MCSC_Portal_name')]",
             "location": "[resourceGroup().location]",
             "properties": {
-                "name": "[parameters('sites_MCSC_Authorization_name')]",
+                "name": "[parameters('sites_MCSC_Portal_name')]",
                 "siteConfig": {
                     "phpVersion": "off",
                     "appSettings": [
                         {
-                            "Name": "APP_INSIGHTS_KEY",
-                            "Value": "[parameters('APP_INSIGHTS_KEY')]"
+                            "Name": "ROOT",
+                            "Value": "[concat('https://', parameters('sites_MCSC_Portal_name'), '.azurewebsites.net')]"
+                        },
+                        {
+                            "Name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "Value": "[reference(resourceId('microsoft.insights/components', variables('appInsightsName')), '2014-04-01').InstrumentationKey]"
                         },
                         {
                             "Name": "WEBSITE_NODE_DEFAULT_VERSION",
-                            "Value": "4.4.7"
+                            "Value": "[parameters('WEBSITE_NODE_DEFAULT_VERSION')]"
                         }
                     ]
-                },
-                "RepoUrl": "[parameters('repoURL')]",
-                "branch": "[parameters('branch')]",
-                "IsManualIntegration": true
-            }
-        }
+                }
+            },
+			"dependsOn": [
+                "[resourceId('microsoft.insights/components', variables('appInsightsName'))]"
+            ],
+            "resources": [
+               {
+                    "apiVersion": "2016-08-01",
+                    "name": "web",
+                    "type": "sourcecontrols",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.Web/sites/', parameters('sites_MCSC_Portal_name'))]"
+                    ],
+                    "properties": {
+                      "name": "GitHub",
+                      "repoUrl": "[parameters('repoURL')]",
+                      "branch": "[parameters('branch')]",
+                      "IsManualIntegration": true
+                    }
+               }
+            ]
+        }		
     ]
 }
