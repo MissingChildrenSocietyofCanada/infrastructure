@@ -40,8 +40,9 @@
         }
     },
     "variables": {
-        "$singleQuote": "'",
+        "singleQuote": "'",
         "sbVersion": "2015-08-01",
+        "sendMessagePath": "[concat('/@{encodeURIComponent(', variables('singleQuote'), parameters('serviceBusQueueName'), variables('singleQuote'), ')}/messages')]",
         "defaultSASKeyName": "RootManageSharedAccessKey",
         "authRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusNamespaceName'), variables('defaultSASKeyName'))]"
     },
@@ -136,7 +137,7 @@
                                     }
                                 },
                                 "method": "post",
-                                "path": "/@{encodeURIComponent('tofilter')}/messages"
+                                "path": "[variables('sendMessagePath')]"
                             }
                         }
                     },

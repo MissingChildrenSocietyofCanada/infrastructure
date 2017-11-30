@@ -5,7 +5,7 @@
 		"functionAppsName": {
 			"type": "string",
 			"metadata": {
-				"description": "mscs-cf-functions"
+				"description": "mscs-hfm-functions"
 			}
 		},
 		"storageAccountType": {
@@ -21,7 +21,7 @@
 		"cosmosDBAccountName": {
 			"type": "string",
 			"metadata": {
-				"description": "mcsc"
+				"description": "mcsc-hfm-db"
 			}
 		},
 		"serviceBusNamespaceName": {
@@ -53,7 +53,7 @@
 		},
 		"repoURL": {
 			"type": "string",
-			"defaultValue": "https://github.com/Missing-Children-Society-Canada/messaging"
+			"defaultValue": "https://github.com/MissingChildrenSocietyofCanada/messaging"
 		},
 		"branch": {
 			"type": "string",
@@ -64,7 +64,8 @@
 		"storageAccountName": "[concat('func', uniqueString(resourceGroup().id), 'storage')]",
 		"sbVersion": "2015-08-01",
 		"defaultSASKeyName": "RootManageSharedAccessKey",
-		"SBauthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusNamespaceName'), variables('defaultSASKeyName'))]"
+		"SBauthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusNamespaceName'), variables('defaultSASKeyName'))]",
+		"appInsightsName": "[concat(parameters('functionAppsName'), '_insights')]"
 	},
 	"resources": [
 		{
@@ -77,7 +78,23 @@
 			}
 		},
 		{
-			"apiVersion": "2016-03-01",
+			"type": "microsoft.insights/components",
+			"kind": "web",
+			"name": "[variables('appInsightsName')]",
+			"apiVersion": "2014-04-01",
+			"location": "eastus",
+			"tags": {
+				"applicationType": "web",
+				"[concat('hidden-link:/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Web/sites/',parameters('functionAppsName'))]": "Resource"
+			},
+			"scale": null,
+			"properties": {
+				"ApplicationId": "[variables('appInsightsName')]"
+			},
+			"dependsOn": []
+		},
+		{
+			"apiVersion": "2016-08-01",
 			"type": "Microsoft.Web/sites",
 			"name": "[parameters('functionAppsName')]",
 			"location": "[resourceGroup().location]",
@@ -113,12 +130,8 @@
 							"value": "[toLower(parameters('functionAppsName'))]"
 						},
 						{
-							"name": "WEBSITE_NODE_DEFAULT_VERSION",
-							"value": "6.5.0"
-						},
-						{
-							"name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-							"value": ""
+							"Name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+							"Value": "[reference(resourceId('microsoft.insights/components', variables('appInsightsName')), '2014-04-01').InstrumentationKey]"
 						},
 						{
 							"name": "AzureWebJobsServiceBus",
@@ -160,18 +173,20 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+				"[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+				"[resourceId('microsoft.insights/components', variables('appInsightsName'))]"
 			],
 			"resources": [
 				{
-					"apiVersion": "2015-08-01",
+					"apiVersion": "2016-08-01",
 					"name": "web",
 					"type": "sourcecontrols",
 					"dependsOn": [
-						"[resourceId('Microsoft.Web/Sites', parameters('functionAppsName'))]"
+						"[resourceId('Microsoft.Web/sites/', parameters('functionAppsName'))]"
 					],
 					"properties": {
-						"RepoUrl": "[parameters('repoURL')]",
+						"name": "GitHub",
+						"repoUrl": "[parameters('repoURL')]",
 						"branch": "[parameters('branch')]",
 						"IsManualIntegration": true
 					}

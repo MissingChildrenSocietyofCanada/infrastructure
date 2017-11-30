@@ -61,7 +61,7 @@ $DefaultWebhookName = 'mcsc-hfm-webhooks' + $Environment.ToLower()
 $DefaultWebAppAuthName = 'mcsc-hfm-web-auth' + $Environment.ToLower()
 $DefaultWebAppPortalName = 'mcsc-hfm-web-portal' + $Environment.ToLower()
 $DefaultTwitterPullLogicAppName = 'mcsc-hfm-twitter-pull' + $Environment.ToLower()
-$DefaultTwitterHashtagTrigger = 'HFM' + $PreEnvironment
+$DefaultHashtagTrigger = 'HFM' + $PreEnvironment
 $DefaultWebsiteNodeDefaultVersion = '4.4.7'
 $ResourceGroupName = $null
 $DBAccountName = $null
@@ -75,7 +75,7 @@ $TwitterConsumerKey = $null
 $TwitterConsumerSecret = $null
 $TwitterAccessTokenKey = $null
 $TwitterAccessTokenSecret = $null
-$TwitterHashtagTrigger = $null
+$HashtagTrigger = $null
 $FacebookConsumerKey = $null
 $FacebookConsumerSecret = $null
 $FacebookVerifyToken = $null
@@ -147,9 +147,9 @@ if ($UseParameterFiles -ne 'Y')
         $TwitterPullLogicAppName = Read-Host -Prompt "Input the Twitter Pull Logic App name (default: $DefaultTwitterPullLogicAppName)"
         $TwitterPullLogicAppName = $TwitterPullLogicAppName.ToLower()
 
-        # Twitter Hashtag Trigger
-        $TwitterHashtagTrigger = Read-Host -Prompt "Input the Twitter hashtag trigger (default: $DefaultTwitterHashtagTrigger)"
-        $TwitterHashtagTrigger = $TwitterHashtagTrigger.ToLower()
+        # Hashtag Trigger
+        $HashtagTrigger = Read-Host -Prompt "Input the hashtag trigger (default: $TwitterHashtagTrigger)"
+        $HashtagTrigger = $HashtagTrigger.ToLower()
         
         # Website Node Default Version
         $WebsiteNodeDefaultVersion = Read-Host -Prompt "Input the website node default version (default: $DefaultWebsiteNodeDefaultVersion)"
@@ -189,8 +189,8 @@ if ($UseParameterFiles -ne 'Y')
         $TwitterPullLogicAppName = $DefaultTwitterPullLogicAppName
     }
 
-    if ($TwitterHashtagTrigger -eq $null -or $TwitterHashtagTrigger -eq '') {
-        $TwitterHashtagTrigger = $DefaultTwitterHashtagTrigger
+    if ($HashtagTrigger -eq $null -or $HashtagTrigger -eq '') {
+        $HashtagTrigger = $DefaultHashtagTrigger
     }
 
     if ($WebsiteNodeDefaultVersion -eq $null -or $WebsiteNodeDefaultVersion -eq '') {
@@ -212,7 +212,7 @@ Write-Output "Webhook name: $WebhookName"
 Write-Output "Web App Auth site name: $WebAppAuthName"
 Write-Output "Web App Portal site name: $WebAppPortalName"
 Write-Output "Twitter Pull Logic App name: $TwitterPullLogicAppName"
-Write-Output "Twitter hashtag trigger: $TwitterHashtagTrigger"
+Write-Output "Hashtag trigger: $HashtagTrigger"
 Write-Output "Website Node default version: $WebsiteNodeDefaultVersion"
 Write-Output "Root GitHub URI: $RootGitHubURI"
 Write-Output "GitHub Branch: $GitHubBranch"
@@ -434,7 +434,7 @@ Write-Output  '*****************************************************'
 
 #region Deployment of Azure Functions
 
-Write-Output "Deploying Azure Function..."
+Write-Output "Deploying Azure Functions..."
 $DeploymentName = 'Functions-'+ $Date
 
 $Results = New-AzureRmResourceGroupDeployment -Name $DeploymentName -ResourceGroupName $ResourceGroupName -TemplateUri $FunctionsTemplate -TemplateParameterObject `
@@ -460,7 +460,7 @@ Write-Output  '*****************************************************'
 
 #region Deployment of Web Hook
 
-Write-Output "Deploying Web Hook..."
+Write-Output "Deploying Web Hooks..."
 $DeploymentName = 'WebHook-'+ $Date
 
 $Results = New-AzureRmResourceGroupDeployment -Name $DeploymentName -ResourceGroupName $ResourceGroupName -TemplateUri $WebHookTemplate -TemplateParameterObject `
@@ -470,6 +470,7 @@ $Results = New-AzureRmResourceGroupDeployment -Name $DeploymentName -ResourceGro
         serviceBusNamespaceName=$serviceBusNamespace.ToString(); `
         facebookToken=$FacebookVerifyToken.ToString(); `
         instagramToken=$InstagramVerifyToken.ToString(); `
+        hashtag=$HashtagTrigger.ToString(); `
         repoURL=$rootUri.AbsoluteUri + 'webhooks'; `
         branch=$GitHubBranch.ToString(); `
     } -Force

@@ -5,7 +5,7 @@
         "functionAppsName": {
             "type": "string",
             "metadata": {
-                "description": "mcsc-webhook"
+                "description": "mcsc-hfm-webhook"
             }
         },
 		"storageAccountType": {
@@ -36,6 +36,12 @@
 				"description": "The token used to connect to Instagram."
 			}
 		},
+        "hashtag": {
+            "type": "string",
+            "metadata": {
+                "description": "The Hashtag we are tracking"
+            }
+        },
 		"repoURL": {
 			"type": "string",
 			"defaultValue": "https://github.com/MissingChildrenSocietyofCanada/webhooks"
@@ -123,6 +129,10 @@
 						"value": "[listkeys(variables('SBauthRuleResourceId'), variables('sbVersion')).primaryConnectionString]"
 					}, 
 					{
+						"name": "HASHTAG",
+						"value": "[parameters('hashtag')]"
+					}, 
+					{
 						"name": "FB_VERIFY_TOKEN",
 						"value": "[parameters('facebookToken')]"
 					}, 
@@ -142,13 +152,13 @@
 					"name": "web",
 					"type": "sourcecontrols",
 					"dependsOn": [
-					"[resourceId('Microsoft.Web/sites/', parameters('functionAppsName'))]"
+						"[resourceId('Microsoft.Web/sites/', parameters('functionAppsName'))]"
 					],
 					"properties": {
-					"name": "GitHub",
-					"repoUrl": "[parameters('repoURL')]",
-					"branch": "[parameters('branch')]",
-					"IsManualIntegration": true
+						"name": "GitHub",
+						"repoUrl": "[parameters('repoURL')]",
+						"branch": "[parameters('branch')]",
+						"IsManualIntegration": true
 					}
 				}
 			]
